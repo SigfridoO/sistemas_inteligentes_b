@@ -75,7 +75,7 @@ Comunicación de diagnóstico: Puerto serial
 
 ---
 
-# Estructura sugerida del repositorio
+# Estructura del repositorio
 
 ```text
 practicas/
@@ -117,7 +117,11 @@ Ejemplo de temporizador para Arduino disponible en GitHub Gist:
 
 https://gist.github.com/SigfridoO/ae2462603e3c8288c024dd8dde54b7fc
 
-Este recurso puede utilizarse como referencia para ejercicios que requieran ejecutar acciones periódicas sin depender exclusivamente de retardos bloqueantes.
+## Contador para Arduino
+
+https://gist.github.com/SigfridoO/6203312657831a95ad59471da458010b
+
+
 
 ## Próximos enlaces
 
