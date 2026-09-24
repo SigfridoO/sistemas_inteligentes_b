@@ -63,3 +63,18 @@ print("y: ", y)
 print("x or y:", x or y)
 print("x and y:", x and y)
 print("not x", not x)
+
+# =========================== operadores nivel de bits  ===========================
+
+numero_1 = 9
+numero_2 = 3
+
+print("numero_1:", numero_1)
+print("numero_2:", numero_2)
+
+print("numero_1 | numero_2:", numero_1 | numero_2)
+print("numero_1 & numero_2:", numero_1 & numero_2)
+print("numero_1 ^ numero_2:", numero_1 ^ numero_2)
+print("~numero_1:", ~numero_1)
+print("numero_1 >> 1:", numero_1 >> 1)
+print("numero_1 << 2:", numero_1 << 1)
