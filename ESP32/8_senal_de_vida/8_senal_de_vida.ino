@@ -83,7 +83,7 @@ void setup() {
   // Temporizandores
     TON[0].tiempo = (unsigned long) 800;
     TON[1].tiempo = (unsigned long) 300;
-    TON[2].tiempo = (unsigned long) 6000;
+    TON[2].tiempo = (unsigned long) 2000;
 
   // Contadores
   C[0].cuentaMaxima = 3;
@@ -97,13 +97,20 @@ void loop() {
   //////////////////////////////////////////////////////////
   //Activacion
 
-  TON[0].entrada = !TON[1].salida;
+  TON[0].entrada = !TON[1].salida && !C[0].salida;
   actualizarTON(0);
 
   TON[1].entrada = TON[0].salida;
   actualizarTON(1);
 
-  Y_00 = !TON[0].salida;
+  C[0].habilitar =  !TON[2].salida;
+  C[0].entrada = !TON[0].salida;
+  actualizarContador(0);
+
+  TON[2].entrada = C[0].salida;
+  actualizarTON(2);
+
+  Y_00 = !TON[0].salida && !C[0].salida;
 
   // Para debugear
   Serial.printf("\nX_00 %d, X_01 %d, X_02 %d, X_03 %d, X_04 %d, X_05 %d, Y_00 %d , Y_01 %d, M_00 %d, M_01 %d, M_02 %d, M_03 %d, M_04 %d", 
