@@ -64,7 +64,7 @@ struct contador {
 void actualizarContador (byte);
 
 
-
+byte contador;
 
 void setup() {
   // Configuracion de pines
@@ -112,9 +112,19 @@ void loop() {
 
   Y_00 = !TON[0].salida && !C[0].salida;
 
+    // Secuencia
+    TON[3].entrada = !TON[3].salida;
+    actualizarTON(3);
+
+    if (TON[3].salida) {
+      contador++;
+      Serial.printf("\n%d: ", contador);
+    }
+
+
   // Para debugear
-  Serial.printf("\nX_00 %d, X_01 %d, X_02 %d, X_03 %d, X_04 %d, X_05 %d, Y_00 %d , Y_01 %d, M_00 %d, M_01 %d, M_02 %d, M_03 %d, M_04 %d", 
-    X_00, X_01, X_02, X_03, X_04, X_05, Y_00, Y_01, M_00, M_01, M_02, M_03, M_04);
+//  Serial.printf("\nX_00 %d, X_01 %d, X_02 %d, X_03 %d, X_04 %d, X_05 %d, Y_00 %d , Y_01 %d, M_00 %d, M_01 %d, M_02 %d, M_03 %d, M_04 %d", 
+ //   X_00, X_01, X_02, X_03, X_04, X_05, Y_00, Y_01, M_00, M_01, M_02, M_03, M_04);
 
   // Mapeando entradas y salidas
   X_00 = digitalRead(DI_00);
