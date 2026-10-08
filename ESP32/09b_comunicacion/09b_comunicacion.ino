@@ -23,11 +23,15 @@ byte Y_00 = 0;
 byte Y_01 = 0;
 byte Y_02 = 0;
 
+/*
 byte M_00 = 0;
 byte M_01 = 0;
 byte M_02 = 0;
 byte M_03 = 0;
 byte M_04 = 0;
+*/
+#define TAMANIO_BANDERAS 80
+byte M[TAMANIO_BANDERAS];
 
 //////////////////////////////////////////////// Temporizadores
 
@@ -167,12 +171,12 @@ void loop() {
       //Serial.write(contador);
     }
 
-    M_00 = (X_00 || M_00 || M_02) && !X_01 & !M_03;
+    M[0] = (X_00 || M[0] || M[2]) && !X_01 & !M[3];
 
-    Y_01 = M_00;
+    Y_01 = M[0];
 
-    M_02 = 0;
-    M_03 = 0;
+    M[2] = 0;
+    M[3] = 0;
     
 
 
@@ -294,10 +298,58 @@ void leerInstruccionDeBuffer(byte *ptrBufferLectura, int *ptrBufferIndice, byte 
                         (*ptrTamanioBufferInstruccion) ++;
                     }
                     // TODO: Se tiene la instruccion separada y se debe de decodificar
-                    imprimirTrama(bufferInstruccion, 0, *ptrTamanioBufferInstruccion);
+                    obtenerInstruccion();
+                    
+  //                  imprimirTrama(bufferInstruccion, 0, *ptrTamanioBufferInstruccion);
                     *ptrBufferIndice = k;
                 }
             }
         }
     }
+}
+
+void obtenerInstruccion(){
+    int *tamanio;
+    byte *cadena;
+    int tipoDeInstruccion = 0;
+    int numeroDeInstruccion = 0;
+
+    tamanio = &bufferIndiceInstruccion;
+    cadena = bufferInstruccion;
+
+      tipoDeInstruccion = obtenerByteDeArregloByte( cadena + 1);
+      numeroDeInstruccion = obtenerByteDeArregloByte( cadena + 2);
+
+//      Serial.printf("tipo: %d", tipoDeInstruccion);
+//      Serial.printf("numero: %d", numeroDeInstruccion);
+
+    byte indice = 0;
+    byte valor = 0;
+
+     switch (tipoDeInstruccion) {
+        case CONTROL:
+            switch (numeroDeInstruccion){
+                case MODIFICAR_BANDERAS:
+                    indice = obtenerByteDeArregloByte(cadena + 3) - 48;
+                    valor = obtenerByteDeArregloByte(cadena + 4) - 48;
+                    M[indice] = valor;
+                  break;
+            }
+           break;
+         
+         case ADMINISTRACION:
+            switch (numeroDeInstruccion){
+                case OBTENER_VERSION:
+                  Serial.print ("La version es 0.0.1 ESP32 Sigfrido Soria");
+                  break;
+            }
+             break;
+         }
+}
+
+
+byte obtenerByteDeArregloByte(byte *ptrArreglo){
+    byte *punteroByte;
+    punteroByte = (byte *) ptrArreglo;
+    return *punteroByte;
 }
