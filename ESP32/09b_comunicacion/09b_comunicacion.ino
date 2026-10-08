@@ -66,6 +66,45 @@ void actualizarContador (byte);
 
 byte contador;
 
+//////////////////////////////////////////////// Comunicación
+/*
+ *  CI|TI|NI|Datos ........|LG|V | CF
+ *  
+ *  CI  - Caracter de inicio
+ *  TI - Tipo de instrucción
+ *  NU - Numero de instrucción
+ *  LG - Longitud
+ *  V - Código de verificación
+ *  CF - Caracter de fin
+ */
+
+
+#define bufferIndiceMaximo 120
+byte bufferLectura[bufferIndiceMaximo];
+int bufferIndice = 0;
+
+byte bufferInstruccion[bufferIndiceMaximo];
+int bufferIndiceInstruccion = 0;
+
+void leerInstruccionDeBuffer(byte *, int *, byte* , int *);
+void obtenerInstruccion();
+
+
+void colocarDatosEnBuffer();
+void imprimirTrama(byte *, int, int);
+byte obtenerByteDeArregloByte(byte *);
+
+char caracterDeInicio = '?';
+char caracterDeFin = '~';
+
+#define CONTROL '0'
+#define MODIFICAR_BANDERAS '1'
+
+#define ADMINISTRACION '1'
+#define OBTENER_VERSION '1'
+
+
+
 void setup() {
   // Configuracion de pines
   pinMode(DI_00, INPUT);
@@ -84,6 +123,7 @@ void setup() {
     TON[0].tiempo = (unsigned long) 800;
     TON[1].tiempo = (unsigned long) 300;
     TON[2].tiempo = (unsigned long) 2000;
+    TON[3].tiempo = (unsigned long) 1000;
 
   // Contadores
   C[0].cuentaMaxima = 3;
@@ -96,6 +136,12 @@ void setup() {
 void loop() {
   //////////////////////////////////////////////////////////
   //Activacion
+  colocarDatosEnBuffer();
+ leerInstruccionDeBuffer(bufferLectura, &bufferIndice, bufferInstruccion , &bufferIndiceInstruccion);
+
+
+
+
 
   TON[0].entrada = !TON[1].salida && !C[0].salida;
   actualizarTON(0);
@@ -118,8 +164,16 @@ void loop() {
 
     if (TON[3].salida) {
       contador++;
-      Serial.printf("\n%d: ", contador);
+      //Serial.write(contador);
     }
+
+    M_00 = (X_00 || M_00 || M_02) && !X_01 & !M_03;
+
+    Y_01 = M_00;
+
+    M_02 = 0;
+    M_03 = 0;
+    
 
 
   // Para debugear
@@ -193,4 +247,57 @@ void actualizarContador (byte numeroContador) {
     
     C[numeroContador].aux1 = C[numeroContador].entrada;
     C[numeroContador].reset = 0;
+}
+
+
+///////////////////////////////////////////////////// Comunicación
+void colocarDatosEnBuffer(){
+    byte caracter = 0;
+    int aux = 0;
+    while (Serial.available() > 0) {
+        caracter = Serial.read();
+        bufferLectura[bufferIndice++] = caracter;
+
+        if (bufferIndice + 1 > bufferIndiceMaximo ) {
+            aux =  bufferIndiceMaximo >> 1;
+            for (int i = aux; i < bufferIndiceMaximo +1; i++) {
+                bufferIndice = i -aux;
+                bufferLectura[bufferIndice] = bufferLectura[i];
+            }
+        }
+    }
+//    imprimirTrama(bufferLectura, 0, bufferIndice);
+}
+
+void imprimirTrama(byte *ptrTrama, int  inicio, int tamanio){
+    Serial.print("\n>>");
+    for (int k = inicio; k < inicio + tamanio; k++) {
+      Serial.write(*(ptrTrama + k));
+    }
+}
+
+void leerInstruccionDeBuffer(byte *ptrBufferLectura, int *ptrBufferIndice, byte *ptrBufferInstruccion,
+    int *ptrTamanioBufferInstruccion){
+    int i = 0;
+    int k = 0;
+    int encontrado = -1  ;
+
+    if (ptrBufferLectura [ *ptrBufferIndice - 1] == caracterDeFin) {
+        for ( k = *ptrBufferIndice; k >= 0; --k) {
+            if (ptrBufferLectura [k] ==  (byte) caracterDeInicio ) {
+                encontrado = k;
+                if (encontrado >= 0) {
+                    *ptrTamanioBufferInstruccion = 0;
+
+                    for (int j = k; j < *ptrBufferIndice; j++) {
+                        ptrBufferInstruccion[*ptrTamanioBufferInstruccion] = ptrBufferLectura [j];
+                        (*ptrTamanioBufferInstruccion) ++;
+                    }
+                    // TODO: Se tiene la instruccion separada y se debe de decodificar
+                    imprimirTrama(bufferInstruccion, 0, *ptrTamanioBufferInstruccion);
+                    *ptrBufferIndice = k;
+                }
+            }
+        }
+    }
 }
