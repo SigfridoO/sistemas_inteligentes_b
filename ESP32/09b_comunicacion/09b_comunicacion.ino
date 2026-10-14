@@ -168,7 +168,8 @@ void loop() {
 
     if (TON[3].salida) {
       contador++;
-      //Serial.write(contador);
+      // Serial.write(contador);
+      Serial.print(TON[0].tiempo);
     }
 
     M[0] = (X_00 || M[0] || M[2]) && !X_01 & !M[3];
