@@ -100,9 +100,30 @@ byte obtenerByteDeArregloByte(byte *);
 
 char caracterDeInicio = '?';
 char caracterDeFin = '~';
+byte escrituraMascara = 0;
+int escrituraLongitud = 0;
+
+#define bufferEscrituraMaximo  120
+byte bufferEscritura[bufferEscrituraMaximo];
+int bufferEscrituraIndice = 0;
+
+void bufferEscrituraLimpiar (void);
+void imprimirInicioEscritura(int, int);
+void imprimirFinalEscritura (void);
+
+void colocarUint8EnEscritura(byte);
+void colocarUint16EnEscritura(int);
+void colocarUint32EnEscritura(int);
+
+void colocarCaracterEnEscritura(char);
 
 #define CONTROL '0'
 #define MODIFICAR_BANDERAS '1'
+
+#define LEER_SENALES 51 // '3'
+#define LEER_SENALES_RESPUESTA 52 // '4'
+
+
 
 #define ADMINISTRACION '1'
 #define OBTENER_VERSION '1'
@@ -169,7 +190,7 @@ void loop() {
     if (TON[3].salida) {
       contador++;
       // Serial.write(contador);
-      Serial.print(TON[0].tiempo);
+      //Serial.print(TON[0].tiempo);
     }
 
     M[0] = (X_00 || M[0] || M[2]) && !X_01 & !M[3];
@@ -335,6 +356,14 @@ void obtenerInstruccion(){
                     valor = obtenerByteDeArregloByte(cadena + 4) - 48;
                     M[indice] = valor;
                   break;
+                case LEER_SENALES:
+                   imprimirInicioEscritura(CONTROL, LEER_SENALES_RESPUESTA);
+                  // TODO: Bytes a enviar
+                  
+                  imprimirFinalEscritura();
+                  Serial.write(bufferEscritura, bufferEscrituraIndice);
+                   
+                   break;
             }
            break;
          
@@ -353,4 +382,41 @@ byte obtenerByteDeArregloByte(byte *ptrArreglo){
     byte *punteroByte;
     punteroByte = (byte *) ptrArreglo;
     return *punteroByte;
+}
+
+
+
+
+void bufferEscrituraLimpiar (void){
+  for (int i = 0; i < bufferEscrituraMaximo; i++) {
+    bufferEscritura[i] = (byte) 0;
+  }
+}
+
+void imprimirInicioEscritura(int tipoDeInstruccion, int numeroDeInstruccion){
+  bufferEscrituraLimpiar();
+  colocarCaracterEnEscritura(caracterDeInicio);
+  colocarUint8EnEscritura(tipoDeInstruccion);
+  colocarUint8EnEscritura(numeroDeInstruccion);
+  
+}
+void imprimirFinalEscritura (void){
+  colocarCaracterEnEscritura(caracterDeFin);
+}
+
+
+
+void colocarUint8EnEscritura(byte numeroByte){
+  
+  byte byte0 = (byte) (numeroByte & 0xFFU);
+  bufferEscritura[bufferEscrituraIndice++] = 
+  escrituraLongitud++;
+  escrituraMascara ^=  (byte) byte0;
+}
+
+
+void colocarCaracterEnEscritura(char caracter){
+  bufferEscritura[bufferEscrituraIndice++] = (byte) caracter;
+  escrituraLongitud++;
+  escrituraMascara ^=  (byte) caracter;
 }
