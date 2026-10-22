@@ -99,7 +99,7 @@ void imprimirTrama(byte *, int, int);
 byte obtenerByteDeArregloByte(byte *);
 
 char caracterDeInicio = '?';
-char caracterDeFin = '~';
+char caracterDeFin = '*';
 byte escrituraMascara = 0;
 int escrituraLongitud = 0;
 
@@ -292,7 +292,7 @@ void colocarDatosEnBuffer(){
             }
         }
     }
-//    imprimirTrama(bufferLectura, 0, bufferIndice);
+    //imprimirTrama(bufferLectura, 0, bufferIndice);
 }
 
 void imprimirTrama(byte *ptrTrama, int  inicio, int tamanio){
@@ -322,7 +322,7 @@ void leerInstruccionDeBuffer(byte *ptrBufferLectura, int *ptrBufferIndice, byte 
                     // TODO: Se tiene la instruccion separada y se debe de decodificar
                     obtenerInstruccion();
                     
-  //                  imprimirTrama(bufferInstruccion, 0, *ptrTamanioBufferInstruccion);
+                     //imprimirTrama(bufferInstruccion, 0, *ptrTamanioBufferInstruccion);
                     *ptrBufferIndice = k;
                 }
             }
@@ -342,8 +342,8 @@ void obtenerInstruccion(){
       tipoDeInstruccion = obtenerByteDeArregloByte( cadena + 1);
       numeroDeInstruccion = obtenerByteDeArregloByte( cadena + 2);
 
-//      Serial.printf("tipo: %d", tipoDeInstruccion);
-//      Serial.printf("numero: %d", numeroDeInstruccion);
+      //Serial.printf("tipo: %d", tipoDeInstruccion);
+      //Serial.printf("numero: %d", numeroDeInstruccion);
 
     byte indice = 0;
     byte valor = 0;
