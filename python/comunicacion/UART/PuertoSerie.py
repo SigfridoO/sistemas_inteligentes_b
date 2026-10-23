@@ -33,9 +33,11 @@ class PuertoSerie:
             print(f"Datos enviados: {data}")
         else:
             print("Puerto serie no está abierto. No se pueden enviar datos.")
-
-if puerto_serie.is_open:
-    while True:
-        res = puerto_serie.read(1)
-        if res:
-            print("respuesta >> ", ord(res),  res)
+            
+    def leer(self, tamanio=1):
+        if self.puerto_serie.is_open:
+            res = self.puerto_serie.read(tamanio)
+            if res:
+                print("respuesta >> ", res)
+        else:
+            return None
