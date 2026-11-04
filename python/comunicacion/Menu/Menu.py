@@ -14,7 +14,7 @@ term = Terminal()
 class Menu:
 
     def __init__(self):
-        self.puerto_serie = PuertoSerie("/dev/ttyUSB0", 115200)
+        self.puerto_serie = PuertoSerie("/dev/ttyUSB1", 115200)
 
     def pausa(self):
         input(f"{term.yellow}Presione Enter para continuar...{term.normal}")
@@ -64,7 +64,10 @@ class Menu:
                 choices=[
                     {"name": "1. Prender led", "value": "PRENDER_LED"},
                     {"name": "2. Apagar led", "value": "APAGAR_LED"},
-                    {"name": "3. Volver al menú principal", "value": "volver"},
+
+                    {"name": "3. Visualizar señales ", "value": "LEER_SENALES"},
+
+                    {"name": "4. Volver al menú principal", "value": "volver"},
                 ]
             ).execute()
 
@@ -86,6 +89,19 @@ class Menu:
                     arreglo_bytes = bytearray(100)
                     arreglo_bytes[:6] = b'?0131*'
                     self.puerto_serie.escribir(arreglo_bytes[:6])
+
+                case "LEER_SENALES":
+                    print("Opción seleccionada: Leer Señales")
+                    if not self.puerto_serie.puerto_serie.is_open:
+                        print("El puerto serie no está abierto. Por favor, abra el puerto serie primero.")  
+                        return
+                    arreglo_bytes = bytearray(100)
+                    arreglo_bytes[:4] = b'?03*'
+                    self.puerto_serie.escribir(arreglo_bytes[:4])
+
+                    respuesta = self.puerto_serie.leer(10)
+                    print(f"La respuesta es {respuesta}")
+
 
                     
                 case "volver":
@@ -109,7 +125,7 @@ class Menu:
                 choices=[
                     {"name": "1. Puerto serie", "value": "PUERTO_SERIE"},
                     {"name": "2. Señales digitales", "value": "SENALES_DIGITALES"},
-                    {"name": "3. Cerrar puerto serie", "value": "puerto_serie_cerrar"},
+                    {"name": "3. Temporizadores", "value": "TEMPORIZADORES"},
                     {"name": "4. Salir", "value": "salir"},
                 ]
             ).execute()
@@ -121,8 +137,8 @@ class Menu:
                 case "SENALES_DIGITALES":
                     self.submenu_senales_digitales()
 
-                case "puerto_serie_cerrar":
-                    print("Opción seleccionada: Cerrar puerto serie")
+                case "TEMPORIZADORES":
+                    print("Opción seleccionada: Temporizadores")
                     
                 case "salir":
                     print("Saliendo del programa...")

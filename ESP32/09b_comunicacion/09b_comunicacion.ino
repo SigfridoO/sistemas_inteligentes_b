@@ -12,16 +12,20 @@ int DO_02 = 21;
 
 // Señales virtuales
 // Entradas
-byte X_00 = 0;
-byte X_01 = 0;
-byte X_02 = 0;
-byte X_03 = 0;
-byte X_04 = 0;
-byte X_05 = 0;
+#define NUMERO_X 8
+byte X[NUMERO_X];
+//byte X_00 = 0;
+//byte X_01 = 0;
+//byte X_02 = 0;
+//byte X_03 = 0;
+//byte X_04 = 0;
+//byte X_05 = 0;
 
-byte Y_00 = 0;
-byte Y_01 = 0;
-byte Y_02 = 0;
+#define NUMERO_Y 8
+byte Y[NUMERO_Y];
+//byte Y_00 = 0;
+//byte Y_01 = 0;
+//byte Y_02 = 0;
 
 /*
 byte M_00 = 0;
@@ -96,7 +100,14 @@ void obtenerInstruccion();
 
 void colocarDatosEnBuffer();
 void imprimirTrama(byte *, int, int);
+
 byte obtenerByteDeArregloByte(byte *);
+uint16_t obtenerUint16DeArregloByte(byte *);
+uint32_t obtenerUint32DeArregloByte(byte *);
+
+
+
+bool verificarInformacion (void);
 
 char caracterDeInicio = '?';
 char caracterDeFin = '*';
@@ -181,7 +192,7 @@ void loop() {
   TON[2].entrada = C[0].salida;
   actualizarTON(2);
 
-  Y_00 = !TON[0].salida && !C[0].salida;
+  Y[0] = !TON[0].salida && !C[0].salida;
 
     // Secuencia
     TON[3].entrada = !TON[3].salida;
@@ -193,9 +204,9 @@ void loop() {
       //Serial.print(TON[0].tiempo);
     }
 
-    M[0] = (X_00 || M[0] || M[2]) && !X_01 & !M[3];
+    M[0] = (X[0] || M[0] || M[2]) && !X[1] & !M[3];
 
-    Y_01 = M[0];
+    Y[1] = M[0];
 
     M[2] = 0;
     M[3] = 0;
@@ -207,17 +218,17 @@ void loop() {
  //   X_00, X_01, X_02, X_03, X_04, X_05, Y_00, Y_01, M_00, M_01, M_02, M_03, M_04);
 
   // Mapeando entradas y salidas
-  X_00 = digitalRead(DI_00);
-  X_01 = digitalRead(DI_01);
-  X_02 = digitalRead(DI_02);
-  X_03 = digitalRead(DI_03);
-  X_04 = digitalRead(DI_04);
-  X_05 = digitalRead(DI_05);
+  X[0] = digitalRead(DI_00);
+  X[1] = digitalRead(DI_01);
+  X[2] = digitalRead(DI_02);
+  X[3] = digitalRead(DI_03);
+  X[4] = digitalRead(DI_04);
+  X[5] = digitalRead(DI_05);
 
   
-  digitalWrite(DO_00, Y_00);
-  digitalWrite(DO_01, Y_01);
-  digitalWrite(DO_02, Y_02);
+  digitalWrite(DO_00, Y[0]);
+  digitalWrite(DO_01, Y[1]);
+  digitalWrite(DO_02, Y[2]);
 
 }
 
@@ -320,15 +331,37 @@ void leerInstruccionDeBuffer(byte *ptrBufferLectura, int *ptrBufferIndice, byte 
                         (*ptrTamanioBufferInstruccion) ++;
                     }
                     // TODO: Se tiene la instruccion separada y se debe de decodificar
+                    if (verificarInformacion()) {
                     obtenerInstruccion();
                     
                      //imprimirTrama(bufferInstruccion, 0, *ptrTamanioBufferInstruccion);
                     *ptrBufferIndice = k;
+                    }
                 }
             }
         }
     }
 }
+bool verificarInformacion () {
+    int *tamanio;
+    byte *cadena;
+
+    tamanio = &bufferIndiceInstruccion;
+    cadena = bufferInstruccion;
+
+    byte tramaMascara = 0;
+    int tramaTamanio = 0;
+    
+
+
+
+byte escrituraMascara = 0;
+int escrituraLongitud = 0;
+
+
+    
+}
+
 
 void obtenerInstruccion(){
     int *tamanio;
@@ -358,6 +391,20 @@ void obtenerInstruccion(){
                   break;
                 case LEER_SENALES:
                    imprimirInicioEscritura(CONTROL, LEER_SENALES_RESPUESTA);
+                   byte aux = 0;
+                    for (int i = 0; i < 8; i++){
+                        aux |= X[i] << i;
+                    }
+                    colocarUint8EnEscritura(aux);
+
+
+                   aux = 0;
+                    for (int i = 0; i < 8; i++){
+                        aux |= Y[i] << i;
+                    }
+                    colocarUint8EnEscritura(aux);
+
+                    
                   // TODO: Bytes a enviar
                   
                   imprimirFinalEscritura();
@@ -384,6 +431,16 @@ byte obtenerByteDeArregloByte(byte *ptrArreglo){
     return *punteroByte;
 }
 
+uint16_t obtenerUint16DeArregloByte(byte *ptrArreglo){
+  return (uint16_t) ptrArreglo[0] |  (uint16_t) ( ptrArreglo[1] << 8);
+}
+uint32_t obtenerUint32DeArregloByte(byte *ptrArreglo){
+  return  (uint32_t) ptrArreglo[0] |  
+          (uint32_t) ( ptrArreglo[1] << 8) |
+          (uint32_t) ( ptrArreglo[2] << 16) |  
+          (uint32_t) ( ptrArreglo[3] << 24);
+}
+
 
 
 
@@ -407,9 +464,19 @@ void imprimirFinalEscritura (void){
 
 
 void colocarUint8EnEscritura(byte numeroByte){
-  
   byte byte0 = (byte) (numeroByte & 0xFFU);
-  bufferEscritura[bufferEscrituraIndice++] = 
+  bufferEscritura[bufferEscrituraIndice++] = byte0;
+  escrituraLongitud++;
+  escrituraMascara ^=  (byte) byte0;
+}
+
+void colocarUint16EnEscritura(int numero){
+  byte byte0 = (byte) (numero & 0xFFU);
+  byte byte1 = (byte) ((numero)>>8 & 0xFFU);
+  
+  bufferEscritura[bufferEscrituraIndice++] = byte0;
+  bufferEscritura[bufferEscrituraIndice++] = byte1;
+  
   escrituraLongitud++;
   escrituraMascara ^=  (byte) byte0;
 }
